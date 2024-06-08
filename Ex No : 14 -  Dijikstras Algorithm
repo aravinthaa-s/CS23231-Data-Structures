@@ -1,0 +1,100 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#define MAX_VERTICES 100
+
+typedef struct Graph {
+    int numVertices;
+    int** adjacencyMatrix;
+} Graph;
+
+Graph* createGraph(int numVertices) {
+    Graph* graph = (Graph*)malloc(sizeof(Graph));
+    graph->numVertices = numVertices;
+    graph->adjacencyMatrix = (int**)malloc(numVertices * sizeof(int*));
+    for (int i = 0; i < numVertices; i++) {
+        graph->adjacencyMatrix[i] = (int*)malloc(numVertices * sizeof(int));
+        for (int j = 0; j < numVertices; j++) {
+            graph->adjacencyMatrix[i][j] = 0; 
+        }
+    }
+    return graph;
+}
+
+void addEdge(Graph* graph, int src, int dest, int weight) {
+    graph->adjacencyMatrix[src][dest] = weight;
+}
+
+int minDistance(int* distance, int* visited, int numVertices) {
+    int minDist = INT_MAX, minIndex;
+    for (int v = 0; v < numVertices; v++) {
+        if (!visited[v] && distance[v] <= minDist) {
+            minDist = distance[v];
+            minIndex = v;
+        }
+    }
+    return minIndex;
+}
+
+void dijkstra(Graph* graph, int startVertex) {
+    int numVertices = graph->numVertices;
+    int* distance = (int*)malloc(numVertices * sizeof(int));
+    int* visited = (int*)calloc(numVertices, sizeof(int));
+    for (int i = 0; i < numVertices; i++) {
+        distance[i] = INT_MAX; 
+    }
+    distance[startVertex] = 0; 
+
+    for (int count = 0; count < numVertices - 1; count++) {
+        int u = minDistance(distance, visited, numVertices);
+        visited[u] = 1; 
+
+        for (int v = 0; v < numVertices; v++) {
+            if (!visited[v] && graph->adjacencyMatrix[u][v] && distance[u] != INT_MAX &&
+                distance[u] + graph->adjacencyMatrix[u][v] < distance[v]) {
+                distance[v] = distance[u] + graph->adjacencyMatrix[u][v];
+            }
+        }
+    }
+
+    printf("Shortest distances from vertex %d:\n", startVertex);
+    for (int i = 0; i < numVertices; i++) {
+        printf("Vertex %d -> Distance: %d\n", i, distance[i]);
+    }
+
+    free(distance);
+    free(visited);
+}
+
+void freeGraph(Graph* graph) {
+    for (int i = 0; i < graph->numVertices; i++) {
+        free(graph->adjacencyMatrix[i]);
+    }
+    free(graph->adjacencyMatrix);
+    free(graph);
+}
+
+int main() {
+    int numVertices, numEdges, startVertex;
+    printf("Enter the number of vertices: ");
+    scanf("%d", &numVertices);
+    Graph* graph = createGraph(numVertices);
+    printf("Enter the number of edges: ");
+    scanf("%d", &numEdges);
+    printf("Enter the edges and their weights (src dest weight):\n");
+    for (int i = 0; i < numEdges; i++) {
+        int src, dest, weight;
+        scanf("%d %d %d", &src, &dest, &weight);
+        addEdge(graph, src, dest, weight);
+    }
+    printf("Enter the start vertex: ");
+    scanf("%d", &startVertex);
+    if (startVertex < 0 || startVertex >= numVertices) {
+        printf("Invalid start vertex\n");
+        return 1;
+    }
+    dijkstra(graph, startVertex);
+    freeGraph(graph);
+    return 0;
+}
