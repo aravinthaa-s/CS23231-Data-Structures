@@ -1,0 +1,89 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
+
+#define MAX_VERTICES 100
+
+typedef struct Graph {
+    int numVertices;
+    int** adjacencyMatrix;
+} Graph;
+
+Graph* createGraph(int numVertices) {
+    Graph* graph = (Graph*)malloc(sizeof(Graph));
+    graph->numVertices = numVertices;
+    graph->adjacencyMatrix = (int**)malloc(numVertices * sizeof(int*));
+    for (int i = 0; i < numVertices; i++) {
+        graph->adjacencyMatrix[i] = (int*)malloc(numVertices * sizeof(int));
+        for (int j = 0; j < numVertices; j++) {
+            graph->adjacencyMatrix[i][j] = 0; 
+        }
+    }
+    return graph;
+}
+
+void addEdge(Graph* graph, int src, int dest, int weight) {
+    graph->adjacencyMatrix[src][dest] = weight;
+    graph->adjacencyMatrix[dest][src] = weight; 
+}
+
+void primMST(Graph* graph) {
+    int parent[MAX_VERTICES]; 
+    int key[MAX_VERTICES];  
+    int mstSet[MAX_VERTICES]; 
+    for (int i = 0; i < graph->numVertices; i++) {
+        key[i] = INT_MAX;    
+        mstSet[i] = 0;       
+    }
+    key[0] = 0; 
+    parent[0] = -1; 
+
+    for (int count = 0; count < graph->numVertices - 1; count++) {
+        int minKey = INT_MAX, minIndex;
+        for (int v = 0; v < graph->numVertices; v++) {
+            if (mstSet[v] == 0 && key[v] < minKey) {
+                minKey = key[v];
+                minIndex = v;
+            }
+        }
+        mstSet[minIndex] = 1; 
+
+        for (int v = 0; v < graph->numVertices; v++) {
+            if (graph->adjacencyMatrix[minIndex][v] && mstSet[v] == 0 && graph->adjacencyMatrix[minIndex][v] < key[v]) {
+                parent[v] = minIndex;
+                key[v] = graph->adjacencyMatrix[minIndex][v];
+            }
+        }
+    }
+
+    printf("Edges in the Minimum Spanning Tree:\n");
+    for (int i = 1; i < graph->numVertices; i++) {
+        printf("%d - %d\n", parent[i], i);
+    }
+}
+
+void freeGraph(Graph* graph) {
+    for (int i = 0; i < graph->numVertices; i++) {
+        free(graph->adjacencyMatrix[i]);
+    }
+    free(graph->adjacencyMatrix);
+    free(graph);
+}
+
+int main() {
+    int numVertices, numEdges;
+    printf("Enter the number of vertices: ");
+    scanf("%d", &numVertices);
+    Graph* graph = createGraph(numVertices);
+    printf("Enter the number of edges: ");
+    scanf("%d", &numEdges);
+    printf("Enter the edges and their weights (src dest weight):\n");
+    for (int i = 0; i < numEdges; i++) {
+        int src, dest, weight;
+        scanf("%d %d %d", &src, &dest, &weight);
+        addEdge(graph, src, dest, weight);
+    }
+    primMST(graph);
+    freeGraph(graph);
+    return 0;
+}
