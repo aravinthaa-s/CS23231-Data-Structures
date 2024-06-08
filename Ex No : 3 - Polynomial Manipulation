@@ -1,0 +1,130 @@
+#include <stdio.h>
+#include <stdlib.h>
+ struct node {
+     int coeff;
+     int power;
+     struct node *next;
+ };
+void insert(struct node **l,int coeff,int power){
+    struct node *newnode=(struct node*)malloc(sizeof(struct node));
+    if (newnode!=NULL){
+        newnode->coeff=coeff;
+        newnode->power=power;
+        newnode->next=NULL;
+        if (*l==NULL){
+            *l=newnode;
+        }
+        else{
+            struct node *p=*l;
+            while (p->next!=NULL){
+                p=p->next;
+            }
+            p->next=newnode;
+        }
+    }
+}
+void add(struct node *l1,struct node *l2,struct node **l3){
+    struct node *p1=l1,*p2=l2;
+    int coeff;
+    while(p1!=NULL&&p2!=NULL){
+        if (p1->power==p2->power){
+            coeff=p1->coeff+p2->coeff;
+            insert(l3,coeff,p1->power);
+            p1=p1->next;
+            p2=p2->next;
+        }
+        else if (p1->coeff > p2->coeff){
+            insert(l3,p1->coeff,p1->power);
+            p1=p1->next;
+        }
+        else{
+            insert(l3,p2->coeff,p2->power);
+            p2=p2->next;
+        }
+    }
+}
+void sub(struct node *l1,struct node *l2,struct node **l3){
+    struct node *p1=l1,*p2=l2;
+    int coeff;
+    while(p1!=NULL&&p2!=NULL){
+        if (p1->power==p2->power){
+            coeff=p1->coeff-p2->coeff;
+            insert(l3,coeff,p1->power);
+            p1=p1->next;
+            p2=p2->next;
+        }
+        else if (p1->coeff > p2->coeff){
+            insert(l3,p1->coeff,p1->power);
+            p1=p1->next;
+        }
+        else{
+            insert(l3,-p2->coeff,p2->power);
+            p2=p2->next;
+        }
+    }
+}
+void pro(struct node*l1,struct node*l2,struct node **l3){
+    struct node *p1=l1,*p2=l2;
+    int coeff,power;
+    while(p1!=NULL){
+        p2=l2;
+        while(p2!=NULL){
+            coeff=p1->coeff*p2->coeff;
+            power=p1->power+p2->power;
+            insert(l3,coeff,power);
+            p2=p2->next;
+        }
+        p1=p1->next;
+    }
+}
+void display(struct node *l){
+    if (l!=NULL){
+        struct node*p;
+        p=l;
+        while(p!=NULL){
+            printf("(%dx^%d)+",p->coeff,p->power);
+            p=p->next;
+        }
+        printf("0");
+        printf("\n");
+    }
+    else
+        printf("List is empty\n");
+}
+int main() {
+    int n,power,coeff;
+    struct node *l1=NULL;
+    struct node *l2=NULL;
+    struct node *l3=NULL;
+    struct node *l4=NULL;
+    struct node *l5=NULL;
+    printf("Enter the number of variables in Polynomial 1 : ");
+    scanf("%d",&n);
+    for (int i=0;i<n;i++){
+        printf("Enter the Coefficent of X : ");
+        scanf("%d",&coeff);
+        printf("Enter the Power : ");
+        scanf("%d",&power);
+        insert(&l1,coeff,power);
+    }
+    display(l1);
+    printf("Enter the number of variables in Polynomial 2 : ");
+    scanf("%d",&n);
+    for (int i=0;i<n;i++){
+        printf("Enter the Coefficent of X : ");
+        scanf("%d",&coeff);
+        printf("Enter the Power : ");
+        scanf("%d",&power);
+        insert(&l2,coeff,power);
+    }
+    display(l2);
+    add(l1,l2,&l3);
+    printf("Hence the result of Polynomial Addition is : ");
+    display(l3);
+    printf("Hence the result of Polynomial Subtraction is : ");
+    sub(l1,l2,&l4);
+    display(l4);
+    pro(l1,l2,&l5);
+    printf("Hence the result of Polynomial Multiplication is : ");
+    display(l5);
+}
